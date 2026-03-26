@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a2e207a509725314f8a9d840dbfc8b08, type: 3}
+  m_Name: Tutorial 05- Building Power Plant Rotated
+  m_EditorClassIdentifier: Assembly-CSharp::DialogueQuests.QuestData
+  quest_id: tutorial_building_powerplant
+  title: Give it a spin
+  icon: {fileID: 0}
+  desc: Build a rotated machine.
+  sort_order: 1
+  show_in_log: 1
+  steps:
+  - title: Select the power plant
+    desc: You'll find it in the machine building menu.
+    achived: 1
+  - title: Rotate the power plant once
+    desc: Use the rotate button on the right side or "R" to rotate.
+    achived: 0
+  - title: Build on the tile
+    desc: Double tap or click to build the machine.
+    achived: 0

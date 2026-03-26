@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a2e207a509725314f8a9d840dbfc8b08, type: 3}
+  m_Name: Tutorial 10- Inputs & Outputs
+  m_EditorClassIdentifier: Assembly-CSharp::DialogueQuests.QuestData
+  quest_id: inputs-and-outputs
+  title: Item In, Item Out
+  icon: {fileID: 0}
+  desc: 'Build In- Portals and Out- Portals [EXP]'
+  sort_order: 1
+  show_in_log: 1
+  steps:
+  - title: Build 2 Inputs
+    desc: You'll find it in the portals building menu.
+    achived: 0
+  - title: Delete one
+    desc: Just for fun - use the delete button and double tap or click. xXx
+    achived: 0
+  - title: Build 1 Output
+    desc: You'll find it in the portals building menu.
+    achived: 0

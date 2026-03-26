@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a2e207a509725314f8a9d840dbfc8b08, type: 3}
+  m_Name: Tutorial 06- Building Conveyor Rotated
+  m_EditorClassIdentifier: Assembly-CSharp::DialogueQuests.QuestData
+  quest_id: tutorial_building_conveyor
+  title: Connection is everything
+  icon: {fileID: 0}
+  desc: 'Use conveyors to connect machines. [EXP]'
+  sort_order: 1
+  show_in_log: 1
+  steps:
+  - title: Select the conveyor
+    desc: You'll find it in the machine building menu.
+    achived: 0
+  - title: Connect the machines
+    desc: Build conveyors from the resource output to the power plant input. You
+      can rotate conveyors.
+    achived: 0

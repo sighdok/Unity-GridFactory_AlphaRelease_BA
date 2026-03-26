@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a2e207a509725314f8a9d840dbfc8b08, type: 3}
+  m_Name: Tutorial 15- Connect Blueprint
+  m_EditorClassIdentifier: Assembly-CSharp::DialogueQuests.QuestData
+  quest_id: connect-blueprint
+  title: Connect again
+  icon: {fileID: 0}
+  desc: Connect input and output of the machine with conveyors.
+  sort_order: 1
+  show_in_log: 1
+  steps:
+  - title: Connect wood resource node
+    desc: Connect a wood resource node with the machine input.
+    achived: 0
+  - title: Connect the output
+    desc: Connect the machine output to a market or a power plant.
+    achived: 0

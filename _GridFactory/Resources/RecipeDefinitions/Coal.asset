@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ae0fa25c46240074c83d3a8506ac59f8, type: 3}
+  m_Name: Coal
+  m_EditorClassIdentifier: 
+  id: coal
+  displayName: Coal
+  icon: {fileID: 58685304, guid: 74d8d47324752af4499f92ae6a28823f, type: 3}
+  inputItems:
+  - item:
+      type: 1
+    amount: 2
+  outputItems:
+  - item:
+      type: 2
+    amount: 1
+  machineProcessingTimeMultiplikator: 0.5

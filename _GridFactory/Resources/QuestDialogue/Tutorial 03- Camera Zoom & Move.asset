@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a2e207a509725314f8a9d840dbfc8b08, type: 3}
+  m_Name: Tutorial 03- Camera Zoom & Move
+  m_EditorClassIdentifier: Assembly-CSharp::DialogueQuests.QuestData
+  quest_id: tutorial_camera
+  title: Point of view
+  icon: {fileID: 0}
+  desc: Control the camera
+  sort_order: 1
+  show_in_log: 1
+  steps:
+  - title: Zoom the camera.
+    desc: Use mouse wheel, "." & "," keys or 2 finger pinch.
+    achived: 0
+  - title: Move the camera.
+    desc: Use middle mouse button, arrow keys or tap & hold.
+    achived: 0

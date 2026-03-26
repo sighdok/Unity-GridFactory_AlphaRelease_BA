@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 05515859ee78c764a8daf66ee707792b
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 318432
+  packageName: Skill Web - Skill Tree UI Builder
+  packageVersion: 1.6.1
+  assetPath: Assets/Plugins/SQLite/Scripts/SQLite.cs
+  uploadId: 847524

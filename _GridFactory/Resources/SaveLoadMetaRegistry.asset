@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e0550ac11018aa8498845a6e9f54b182, type: 3}
+  m_Name: SaveLoadMetaRegistry
+  m_EditorClassIdentifier: 
+  machines:
+  - id: meta_blueprint
+    prefab: {fileID: 1863603488462498046, guid: 62ba5c145249cf14aa047ea74877ed57, type: 3}
+  - id: meta_splitter
+    prefab: {fileID: 1863603488462498046, guid: 8895a63e71fb54e4f806557e9c7ee23c, type: 3}
+  - id: meta_merger
+    prefab: {fileID: 1863603488462498046, guid: ce51d88bda4dc2a4dba423d98c1d571d, type: 3}
+  - id: meta_market
+    prefab: {fileID: 1863603488462498046, guid: fbbe295f60e65314ea0e0edb6476c362, type: 3}
+  - id: meta_powerplant
+    prefab: {fileID: 1863603488462498046, guid: e3098a4ddcc5fb843a1d04d4b6d899a3, type: 3}
+  - id: meta_resource_farm
+    prefab: {fileID: 1863603488462498046, guid: 3cd9fd8986764414681214fc5cdab290, type: 3}
+  - id: meta_resource_ore
+    prefab: {fileID: 1863603488462498046, guid: b2da8d2bc5f40274bb4be4bcb0d59afb, type: 3}
+  - id: meta_researchCenter
+    prefab: {fileID: 1863603488462498046, guid: b647560cd186dd74fbbc153768aecaa6, type: 3}
+  - id: meta_crossing
+    prefab: {fileID: 1863603488462498046, guid: 4ea0825c11f8f5f4281055fa2d79d66e, type: 3}
+  conveyors:
+  - id: meta_straight_conveyor
+    prefab: {fileID: 1863603488462498046, guid: 30efa2ee68faeec4b80aa651bab22e50, type: 3}

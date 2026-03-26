@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: f80c7e4c5fbf17b4fbc75f5feb0256d1
+AssemblyDefinitionImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 318432
+  packageName: Skill Web - Skill Tree UI Builder
+  packageVersion: 1.6.1
+  assetPath: Assets/Plugins/MDB/MemoryDB.asmdef
+  uploadId: 847524

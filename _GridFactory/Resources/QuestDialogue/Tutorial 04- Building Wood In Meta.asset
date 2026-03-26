@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a2e207a509725314f8a9d840dbfc8b08, type: 3}
+  m_Name: Tutorial 04- Building Wood In Meta
+  m_EditorClassIdentifier: Assembly-CSharp::DialogueQuests.QuestData
+  quest_id: tutorial_building_first_wood
+  title: Resources
+  icon: {fileID: 0}
+  desc: Generate your first resource.
+  sort_order: 1
+  show_in_log: 1
+  steps:
+  - title: Open resource building menu
+    desc: Click or tap.
+    achived: 1
+  - title: Select the wood resource
+    desc: Click or tap.
+    achived: 1
+  - title: Place the resource
+    desc: Click or double tap on the cell to place a machine.
+    achived: 1
