@@ -184,6 +184,7 @@ namespace GridFactory.Grid
 
         public void ApplyStructureSaveData2Pass(MetaGridStructureSaveData data)
         {
+
             if (data == null)
                 return;
 
@@ -198,6 +199,7 @@ namespace GridFactory.Grid
 
                 if (!string.IsNullOrEmpty(c.machineId))
                 {
+                    Debug.Log(c.machineId);
                     var prefab = registry != null ? registry.GetMachine(c.machineId) : null;
                     if (prefab != null)
                     {
@@ -209,7 +211,8 @@ namespace GridFactory.Grid
                             cell.Machine = m;
                             m.Init(cell);
                             m.SetFacing(c.machineFacing);
-
+                            Debug.Log(cell.Machine);
+                            Debug.Log(cell);
                             if (m is MetaResourceNode rn)
                             {
                                 rn.ResourceItem = c.resourceItemType;
@@ -225,6 +228,10 @@ namespace GridFactory.Grid
                                 }
                             }
                         }
+                    }
+                    else
+                    {
+                        Debug.Log("no Prefab Found");
                     }
                 }
 

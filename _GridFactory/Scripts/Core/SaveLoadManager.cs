@@ -157,6 +157,7 @@ namespace GridFactory.Core
             efsMeta.Save();
             efsGrid.Save();
             efsBp.Save();
+            Debug.Log("SAVED ALL");
         }
 
         private void LoadGame()
@@ -174,7 +175,7 @@ namespace GridFactory.Core
                 object obj = efsInv.GetDeserialized(inventoryKey, typeof(InventorySaveData));
                 if (obj == null)
                 {
-                    //Debug.LogWarning("[SaveLoadManager] Keine Inventar-Daten im Save gefunden.");
+                    Debug.LogWarning("[SaveLoadManager] Keine Inventar-Daten im Save gefunden.");
                     return;
                 }
                 else
@@ -183,13 +184,17 @@ namespace GridFactory.Core
                     ApplyInventorySaveData(invData);
                 }
             }
+            else
+            {
+                Debug.Log("NOT LOADED WITHOUT PASSWORD");
+            }
 
             if (efsBp.Load())
             {
                 object obj = efsBp.GetBinary(blueprintKey);
                 if (obj == null)
                 {
-                    //Debug.LogWarning("[SaveLoadManager] Keine Blueprint-Daten im Save gefunden.");
+                    Debug.LogWarning("[SaveLoadManager] Keine Blueprint-Daten im Save gefunden.");
                     return;
                 }
                 else
@@ -209,7 +214,7 @@ namespace GridFactory.Core
                 object obj = efsMeta.GetDeserialized(metaKey, typeof(MetaGridStructureSaveData));
                 if (obj == null)
                 {
-                    //Debug.LogWarning("[SaveLoadManager] Keine Meta-Daten im Save gefunden.");
+                    Debug.LogWarning("[SaveLoadManager] Keine Meta-Daten im Save gefunden.");
                     return;
                 }
                 else
@@ -218,6 +223,7 @@ namespace GridFactory.Core
                     MGM.ApplyStructureSaveData2Pass(metaData);
                 }
             }
+            else { Debug.Log("HELLO"); }
 
             if (efsGrid.Load())
             {
@@ -252,6 +258,7 @@ namespace GridFactory.Core
             efsMeta.Dispose();
             efsTT.Dispose();
             efsGrid.Dispose();
+            Debug.Log("ALL LOADED");
         }
 
         private InventorySaveData BuildInventorySaveData()

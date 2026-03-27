@@ -9,8 +9,8 @@ namespace GridFactory.Meta
     {
         [Serializable] public class Entry { public string id; public GameObject prefab; }
 
-        private List<Entry> _machines = new();
-        private List<Entry> _conveyors = new();
+        public List<Entry> _machines = new();
+        public List<Entry> _conveyors = new();
 
         private Dictionary<string, GameObject> _m;
         private Dictionary<string, GameObject> _c;

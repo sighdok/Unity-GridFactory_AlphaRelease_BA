@@ -73,7 +73,7 @@ namespace GridFactory.Core
 #if UNITY_ANDROID || UNITY_IOS
             CurrentControlScheme = "touch";
 #endif
-            ApplyMode(CurrentMode, false);
+            ApplyMode(CurrentMode, false, true);
             SLM.ForceLoadGame();
         }
 
@@ -172,7 +172,7 @@ namespace GridFactory.Core
             ApplyMode(CurrentMode, playSound);
         }
 
-        private void ApplyMode(GameMode mode, bool playSound = true)
+        private void ApplyMode(GameMode mode, bool playSound = true, bool firstLoad = false)
         {
             UIPM.CloseAllConfigPanels();
 
@@ -183,7 +183,8 @@ namespace GridFactory.Core
             {
                 UIPM.CloseMetaBuildTabs();
                 CC.ResetCamera();
-                AM.SwitchAmbient(true);
+                if (!firstLoad)
+                    AM.SwitchAmbient(true);
 
                 clearGridButton.SetActive(true);
 
@@ -204,7 +205,9 @@ namespace GridFactory.Core
             {
                 UIPM.CloseMicroBuildTabs();
                 CC.ResetCamera();
-                AM.SwitchAmbient(false);
+
+                if (!firstLoad)
+                    AM.SwitchAmbient(false);
 
                 clearGridButton.SetActive(false);
 

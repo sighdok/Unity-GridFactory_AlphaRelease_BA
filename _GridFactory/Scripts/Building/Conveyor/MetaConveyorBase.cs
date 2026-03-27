@@ -7,7 +7,6 @@ using GridFactory.Grid;
 using GridFactory.Directions;
 using GridFactory.Inventory;
 using GridFactory.Meta;
-using UnityEditor.PackageManager;
 
 namespace GridFactory.Conveyor
 {

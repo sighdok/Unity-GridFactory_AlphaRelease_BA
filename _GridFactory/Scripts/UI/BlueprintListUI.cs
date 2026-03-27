@@ -7,13 +7,11 @@ namespace GridFactory.UI
     public class BlueprintListUI : MonoBehaviour
     {
         public static BlueprintListUI Instance { get; private set; }
-        [Header("References")]
-        [SerializeField] private RectTransform contentArea; // ScrollView/Content
-        [SerializeField] private GameObject blueprintButtonPrefab;
 
-        [Header("Placement")]
-        [Tooltip("Standard-Position, an der der Blueprint im Grid platziert wird.")]
-        public Vector2Int defaultAnchor = new Vector2Int(0, 0);
+        private static BlueprintManager BPM => BlueprintManager.Instance;
+
+        [SerializeField] private RectTransform contentArea;
+        [SerializeField] private GameObject blueprintButtonPrefab;
 
         private void Awake()
         {
@@ -22,16 +20,16 @@ namespace GridFactory.UI
                 Destroy(gameObject);
                 return;
             }
+
             Instance = this;
         }
-
 
         public void RefreshList()
         {
             foreach (Transform child in contentArea)
                 Destroy(child.gameObject);
 
-            foreach (var bp in BlueprintManager.Instance.runtimeBlueprints)
+            foreach (var bp in BPM.runtimeBlueprints)
                 CreateButton(bp);
         }
 

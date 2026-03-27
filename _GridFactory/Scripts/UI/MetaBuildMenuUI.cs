@@ -1,31 +1,23 @@
 using UnityEngine;
 
 using GridFactory.Meta;
-using Unity.VisualScripting;
 
 namespace GridFactory.UI
 {
     public class MetaBuildMenuUI : MonoBehaviour
     {
-        [SerializeField] GameObject subConveyor;
-        [SerializeField] GameObject subResource;
-        [SerializeField] GameObject subMachine;
+        private static MetaBuildController MBC => MBC;
 
-        void Update()
-        {
-            if (Input.GetKeyDown(KeyCode.F))
-            {
-                OnClickResearchCenter();
-            }
-        }
+        [SerializeField] private GameObject subConveyor;
+        [SerializeField] private GameObject subResource;
+        [SerializeField] private GameObject subMachine;
 
         public void OnClickConveyorToggle()
         {
-            MetaBuildController.Instance.CancelBuilding();
+            MBC.CancelBuilding();
             if (!subConveyor.activeSelf)
             {
                 subConveyor.SetActive(true);
-
                 subResource.SetActive(false);
                 subMachine.SetActive(false);
             }
@@ -37,11 +29,10 @@ namespace GridFactory.UI
 
         public void OnClickResourceToggle()
         {
-            MetaBuildController.Instance.CancelBuilding();
+            MBC.CancelBuilding();
             if (!subResource.activeSelf)
             {
                 subResource.SetActive(true);
-
                 subConveyor.SetActive(false);
                 subMachine.SetActive(false);
             }
@@ -53,11 +44,10 @@ namespace GridFactory.UI
 
         public void OnClickMachineToggle()
         {
-            MetaBuildController.Instance.CancelBuilding();
+            MBC.CancelBuilding();
             if (!subMachine.activeSelf)
             {
                 subMachine.SetActive(true);
-
                 subConveyor.SetActive(false);
                 subResource.SetActive(false);
             }
@@ -76,63 +66,62 @@ namespace GridFactory.UI
 
         public void OnClickResourceNodeOre()
         {
-            MetaBuildController.Instance.SetBuildType(MetaBuildType.ResourceNodeOre);
+            MBC.SetBuildType(MetaBuildType.ResourceNodeOre);
             CloseAllSubs();
         }
 
         public void OnClickResourceNodeFarm()
         {
-            MetaBuildController.Instance.SetBuildType(MetaBuildType.ResourceNodeFarm);
+            MBC.SetBuildType(MetaBuildType.ResourceNodeFarm);
             CloseAllSubs();
         }
 
         public void OnClickMarket()
         {
-            MetaBuildController.Instance.SetBuildType(MetaBuildType.Market);
+            MBC.SetBuildType(MetaBuildType.Market);
             CloseAllSubs();
         }
 
         public void OnClickPowerPlant()
         {
-            MetaBuildController.Instance.SetBuildType(MetaBuildType.PowerPlant);
+            MBC.SetBuildType(MetaBuildType.PowerPlant);
             CloseAllSubs();
         }
 
         public void OnClickResearchCenter()
         {
-            MetaBuildController.Instance.SetBuildType(MetaBuildType.ResearchCenter);
+            MBC.SetBuildType(MetaBuildType.ResearchCenter);
             CloseAllSubs();
         }
 
         public void OnClickConveyor()
         {
-            MetaBuildController.Instance.SetBuildType(MetaBuildType.Conveyor);
+            MBC.SetBuildType(MetaBuildType.Conveyor);
             CloseAllSubs();
         }
 
         public void OnClickSplitter()
         {
-            MetaBuildController.Instance.SetBuildType(MetaBuildType.Splitter);
+            MBC.SetBuildType(MetaBuildType.Splitter);
             CloseAllSubs();
         }
 
         public void OnClickMerger()
         {
-            MetaBuildController.Instance.SetBuildType(MetaBuildType.Merger);
+            MBC.SetBuildType(MetaBuildType.Merger);
             CloseAllSubs();
         }
 
         public void OnClicKCrossing()
         {
-            MetaBuildController.Instance.SetBuildType(MetaBuildType.Crossing);
+            MBC.SetBuildType(MetaBuildType.Crossing);
             CloseAllSubs();
         }
 
         public void OnClickBlueprint()
         {
-            MetaBuildController.Instance.SetBuildType(MetaBuildType.Blueprint);
+            MBC.SetBuildType(MetaBuildType.Blueprint);
             CloseAllSubs();
         }
-
     }
 }

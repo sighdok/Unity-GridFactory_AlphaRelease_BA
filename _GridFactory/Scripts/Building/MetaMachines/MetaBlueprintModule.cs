@@ -7,8 +7,6 @@ using GridFactory.Core;
 using GridFactory.Grid;
 using GridFactory.Blueprints;
 using GridFactory.Directions;
-using Unity.Android.Gradle;
-using Unity.VisualScripting;
 
 namespace GridFactory.Meta
 {

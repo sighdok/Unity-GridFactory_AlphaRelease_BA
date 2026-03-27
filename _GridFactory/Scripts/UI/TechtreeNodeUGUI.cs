@@ -1,39 +1,42 @@
 
-using Esper.SkillWeb.UI.UGUI;
-using GridFactory.Core;
-using UnityEngine.EventSystems;
+using System.Collections.Generic;
 
 using UnityEngine;
-using Esper.SkillWeb;
-using GridFactory.Inventory;
+using UnityEngine.EventSystems;
+
 using static Esper.SkillWeb.Skill;
-using Unity.VisualScripting;
-using System.Collections.Generic;
+using Esper.SkillWeb.UI.UGUI;
+
+using GridFactory.Core;
+using GridFactory.Inventory;
+
 namespace GridFactory.Tech
 {
     public class TechTreeNodeUGUI : SkillNodeUGUI
     {
+        private static GameManager GM => GameManager.Instance;
+        private static TechTreeManager TTM => TechTreeManager.Instance;
+        private static UIConfirmationManager UICONFIRMM => UIConfirmationManager.Instance;
+        private static HovercardUGUI HCUI => HovercardUGUI.Instance;
+        private static WebViewSelectorUGUI WVSUI => WebViewSelectorUGUI.Instance;
+
         private static readonly List<TechTreeNodeUGUI> allNodeUis = new List<TechTreeNodeUGUI>();
+        [SerializeField] private Color inresearchColor;
+        [SerializeField] private Color obtainedColor;
+
         public static void RefreshAll()
         {
             if (allNodeUis.Count == 0)
                 return;
 
-            // PHASE A: Moves planen
             foreach (TechTreeNodeUGUI node in allNodeUis)
-            {
                 node.Refresh();
-            }
         }
 
-        public Color inresearchColor;
-        public Color obtainedColor;
         void OnEnable()
         {
             if (!allNodeUis.Contains(this))
                 allNodeUis.Add(this);
-
-
         }
 
         private void OnDisable()
@@ -45,69 +48,33 @@ namespace GridFactory.Tech
         {
             if (eventData.button == pointerUpgradeButton)
             {
-
-                if (HovercardUGUI.Instance && GameManager.Instance.CurrentControlScheme != "desktop")
-                {
-                    HovercardUGUI.Instance.Open(this);
-                }
+                if (GameManager.Instance.CurrentControlScheme != "desktop")
+                    HCUI.Open(this);
 
                 if (skillNode.CanResearch())
                 {
-                    UIConfirmationManager.Instance.Show(
+                    UICONFIRMM.Show(
                     "Start research?",
                     () =>
                     {
-
                         Research();
-
-                        TechTreeManager.Instance.ForceTechTreeUIClose();
+                        TTM.ForceTechTreeUIClose();
                     });
                 }
             }
-            if (HovercardUGUI.Instance && HovercardUGUI.Instance.IsOpen && GameManager.Instance.CurrentControlScheme == "desktop")
-            {
-                HovercardUGUI.Instance.Close();
-            }
+
+            if (HCUI.IsOpen && GM.CurrentControlScheme == "desktop")
+                HCUI.Close();
         }
 
         public override void Refresh()
         {
-            /*
-                float size = 100;
-
-                switch (skillNode.skill.size)
-                {
-                    case Skill.Size.Tiny:
-                        size = SkillWeb.Settings.skillNodeSizes.tiny;
-                        break;
-
-                    case Skill.Size.Small:
-                        size = SkillWeb.Settings.skillNodeSizes.small;
-                        break;
-
-                    case Skill.Size.Medium:
-                        size = SkillWeb.Settings.skillNodeSizes.medium;
-                        break;
-
-                    case Skill.Size.Large:
-                        size = SkillWeb.Settings.skillNodeSizes.large;
-                        break;
-
-                    case Skill.Size.Giant:
-                        size = SkillWeb.Settings.skillNodeSizes.giant;
-                        break;
-                }
-
-                rectTransform.sizeDelta = new Vector2(size, size);
-    */
-
-
             if (skillNode != null)
             {
                 SkillIcon icon = skillNode.GetIcon(true);
                 Color iconColor = icon.color;
-
                 var myDataset = skillNode.dataset as TechTreeDataset;
+
                 if (myDataset.baseCost > 0)
                 {
                     if (InventoryManager.Instance.Gold < myDataset.baseCost)
@@ -116,38 +83,23 @@ namespace GridFactory.Tech
                         iconColor = icon.color;
                     }
                 }
-                /*
-                if (TechTreeManager.Instance.IsNodeInResearch(skillNode))
-                {
-
-                    icon = skillNode.GetIconByStateString("locked");
-                    iconColor = icon.color;
-                }
-*/
 
                 iconImage.sprite = icon.icon;
                 iconImage.color = iconColor;
                 iconImage.enabled = icon.icon;
 
                 if (levelText)
-                {
                     levelText.text = $"{skillNode.Level}/{skillNode.MaxLevel}";
-                }
             }
             else
             {
-
                 iconImage.sprite = null;
                 iconImage.color = Color.white;
                 iconImage.enabled = false;
 
                 if (levelText)
-                {
                     levelText.text = "0/0";
-                }
             }
-
-
 
             if (skillBackground)
             {
@@ -167,15 +119,11 @@ namespace GridFactory.Tech
             {
                 onUpgrade.Invoke(this);
 
-                if (HovercardUGUI.Instance && HovercardUGUI.Instance.Target == this)
-                {
-                    HovercardUGUI.Instance.Refresh();
-                }
+                if (HCUI.Target == this)
+                    HCUI.Refresh();
 
-                if (hasPointerHover || WebViewSelectorUGUI.Instance?.focusedNode == this)
-                {
+                if (hasPointerHover || WVSUI.focusedNode == this)
                     UnhighlightPaths();
-                }
 
                 if (skillBackground)
                     skillBackground.color = obtainedColor;
@@ -187,25 +135,17 @@ namespace GridFactory.Tech
 
         public override bool Research()
         {
-
             skillNode.Research();
-
             onResearch.Invoke(this);
 
-            if (HovercardUGUI.Instance && HovercardUGUI.Instance.Target == this)
-            {
-                HovercardUGUI.Instance.Refresh();
-            }
+            if (HCUI.Target == this)
+                HCUI.Refresh();
 
-            if (hasPointerHover || WebViewSelectorUGUI.Instance?.focusedNode == this)
-            {
+            if (hasPointerHover || WVSUI.focusedNode == this)
                 UnhighlightPaths();
-            }
 
             if (skillBackground)
                 skillBackground.color = inresearchColor;
-
-
 
             return true;
         }

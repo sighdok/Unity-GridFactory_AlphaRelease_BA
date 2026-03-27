@@ -18,10 +18,12 @@ namespace GridFactory.Meta
 
         protected override void RotateAdditionalInputs(Direction dir) { }
 
-        private void Start()
+        protected override void OnEnable()
         {
-            var all = IM.AllItems;
+            base.OnEnable();
 
+            var all = IM.AllItems;
+            Debug.Log(all.Count);
             defByType = new Dictionary<ItemType, ItemDefinition>(all.Count);
             foreach (var d in all) defByType[d.type] = d;
         }

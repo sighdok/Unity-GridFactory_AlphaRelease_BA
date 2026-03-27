@@ -9,15 +9,14 @@ namespace GridFactory.UI
     public class BlueprintImportExportWindow : MonoBehaviour
     {
 
+        /*
         private BlueprintDefinition currentBp;
         [SerializeField] private GameObject panelRoot;
         [SerializeField] private TMP_InputField textPanel;
         private bool _isOpen = false;
 
-        public bool IsOpen
-        {
-            get => _isOpen;
-        }
+        public bool IsOpen  => _isOpen;
+
 
         private void Awake()
         {
@@ -39,7 +38,7 @@ namespace GridFactory.UI
             _isOpen = false;
         }
 
-        /*
+     
         public void ExportBlueprint()
         {
             if (currentBp != null)

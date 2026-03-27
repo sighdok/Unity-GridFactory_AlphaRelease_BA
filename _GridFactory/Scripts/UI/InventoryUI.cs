@@ -57,6 +57,11 @@ public class InventoryUI : MonoBehaviour
             Sprite icon = def != null ? def.icon : null;
 
             var entry = Instantiate(entryPrefab, itemsParent);
+            Debug.Log(entry);
+            Debug.Log(type);
+            Debug.Log(icon);
+            Debug.Log(displayName);
+
             entry.Setup(type, icon, displayName);
             entries.Add(entry);
         }

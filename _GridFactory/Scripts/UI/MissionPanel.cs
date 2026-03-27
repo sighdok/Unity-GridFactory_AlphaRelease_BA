@@ -1,16 +1,11 @@
-using System.Collections;
 using System.Collections.Generic;
+
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace DialogueQuests
 {
-
     public class MissionPanel : QuestPanel
     {
-
-
-
         [SerializeField] private GameObject panelRoot;
 
         protected override void Start()
@@ -18,8 +13,6 @@ namespace DialogueQuests
             base.Start();
             panelRoot.SetActive(false);
         }
-
-
 
         public void CheckForUpdate()
         {
@@ -39,10 +32,5 @@ namespace DialogueQuests
                 panelRoot.SetActive(false);
             }
         }
-
-
-
-        // LISTEN TO QUEST MANAGER AND SHOW / UPDATE IF THERE ARE QUESTS
     }
-
 }

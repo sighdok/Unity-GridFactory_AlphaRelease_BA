@@ -9,12 +9,14 @@ namespace GridFactory.UI
     {
         public static BuildMenuUI Instance { get; private set; }
 
-        public Button inputPortButton;
-        public Button outputPortButton;
+        private static BuildController BC => BuildController.Instance;
+        private static PortBuildingController PBC => PortBuildingController.Instance;
 
-        [SerializeField] GameObject subConveyor;
-        [SerializeField] GameObject subResource;
-        [SerializeField] GameObject subMachine;
+        [SerializeField] private Button inputPortButton;
+        [SerializeField] private Button outputPortButton;
+        [SerializeField] private GameObject subConveyor;
+        [SerializeField] private GameObject subResource;
+        [SerializeField] private GameObject subMachine;
 
         private void Awake()
         {
@@ -26,15 +28,14 @@ namespace GridFactory.UI
             Instance = this;
         }
 
-
         private void Start()
         {
-            PortBuildingController.Instance.OnPortMarkerUpdated += TogglePortButtons;
+            PBC.OnPortMarkerUpdated += TogglePortButtons;
         }
 
         public void OnClickConveyorToggle()
         {
-            BuildController.Instance.CancelBuilding();
+            BC.CancelBuilding();
             if (!subConveyor.activeSelf)
             {
                 subConveyor.SetActive(true);
@@ -50,7 +51,7 @@ namespace GridFactory.UI
 
         public void OnClickResourceToggle()
         {
-            BuildController.Instance.CancelBuilding();
+            BC.CancelBuilding();
             if (!subResource.activeSelf)
             {
                 subResource.SetActive(true);
@@ -66,7 +67,7 @@ namespace GridFactory.UI
 
         public void OnClickMachineToggle()
         {
-            BuildController.Instance.CancelBuilding();
+            BC.CancelBuilding();
             if (!subMachine.activeSelf)
             {
                 subMachine.SetActive(true);
@@ -89,85 +90,73 @@ namespace GridFactory.UI
 
         private void TogglePortButtons(bool inputDisabled, bool outputDisabled)
         {
-
             if (inputDisabled == true)
-            {
                 inputPortButton.interactable = false;
-            }
             else if (inputDisabled == false)
-            {
                 inputPortButton.interactable = true;
-            }
 
             if (outputDisabled == true)
-            {
                 outputPortButton.interactable = false;
-            }
             else if (outputDisabled == false)
-            {
                 outputPortButton.interactable = true;
-            }
-
         }
 
 
         public void OnClickSmelter()
         {
-            BuildController.Instance.SetBuildType(BuildType.Smelter);
+            BC.SetBuildType(BuildType.Smelter);
             CloseAllSubs();
         }
 
         public void OnClickSawmill()
         {
-            BuildController.Instance.SetBuildType(BuildType.Sawmill);
+            BC.SetBuildType(BuildType.Sawmill);
             CloseAllSubs();
         }
         public void OnClickMason()
         {
-            BuildController.Instance.SetBuildType(BuildType.Mason);
+            BC.SetBuildType(BuildType.Mason);
             CloseAllSubs();
         }
         public void OnClickOven()
         {
-            BuildController.Instance.SetBuildType(BuildType.Oven);
+            BC.SetBuildType(BuildType.Oven);
             CloseAllSubs();
         }
 
-
-
         public void OnClickConveyor()
         {
-            BuildController.Instance.SetBuildType(BuildType.Conveyor);
+            BC.SetBuildType(BuildType.Conveyor);
             CloseAllSubs();
         }
 
         public void OnClickInputPort()
         {
-            BuildController.Instance.SetBuildType(BuildType.InputPort);
+            BC.SetBuildType(BuildType.InputPort);
             CloseAllSubs();
         }
 
         public void OnClickOutputPort()
         {
-            BuildController.Instance.SetBuildType(BuildType.OutputPort);
+            BC.SetBuildType(BuildType.OutputPort);
             CloseAllSubs();
         }
 
         public void OnClickSplitter()
         {
-            BuildController.Instance.SetBuildType(BuildType.Splitter);
+            BC.SetBuildType(BuildType.Splitter);
             CloseAllSubs();
         }
 
         public void OnClickMerger()
         {
-            BuildController.Instance.SetBuildType(BuildType.Merger);
+            BC.SetBuildType(BuildType.Merger);
             CloseAllSubs();
         }
 
         public void OnClicKCrossing()
         {
-            BuildController.Instance.SetBuildType(BuildType.Crossing);
+            BC.SetBuildType(BuildType.Crossing);
             CloseAllSubs();
         }
     }

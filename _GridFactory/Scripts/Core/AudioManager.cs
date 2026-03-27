@@ -42,19 +42,21 @@ namespace GridFactory.Core
                 return;
             }
             Instance = this;
+
+            kingdomAmbient.volume = 0;
+            kingdomBackground.volume = 0;
+            voidAmbient.volume = 0;
+            voidBackground.volume = 0;
         }
 
         private void Start()
         {
-            kingdomAmbient.volume = ambientMaxVolume;
-            kingdomBackground.volume = backgroundMaxVolume;
-            voidAmbient.volume = 0;
-            voidBackground.volume = 0;
-
             kingdomAmbient.Play();
             kingdomBackground.Play();
             voidAmbient.Play();
             voidBackground.Play();
+            StartCoroutine(FadeIn(kingdomBackground, backgroundMaxVolume));
+            StartCoroutine(FadeIn(kingdomAmbient, ambientMaxVolume));
 
             AddListenersToAllButtons();
         }
@@ -65,6 +67,24 @@ namespace GridFactory.Core
             foreach (Button btn in buttons)
                 if (btn != soundExcludeModeToggleButton)
                     btn.onClick.AddListener(() => PlayButtonClickSFX());
+        }
+
+        private IEnumerator FadeIn(AudioSource fadeIn, float maxVolume = 1)
+        {
+            float time = 0f;
+
+            while (time < fadeDuration)
+            {
+                time += Time.deltaTime;
+                float t = time / fadeDuration * 2;
+
+                fadeIn.volume = Mathf.Lerp(0f, maxVolume, t);
+
+
+                yield return null;
+            }
+
+            fadeIn.volume = maxVolume;
         }
 
         private IEnumerator Crossfade(AudioSource fadeIn, AudioSource fadeOut, float maxVolume = 1)
