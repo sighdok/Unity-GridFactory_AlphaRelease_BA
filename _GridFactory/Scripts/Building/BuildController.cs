@@ -3,85 +3,88 @@ using System;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-using GridFactory.Core;
-using GridFactory.Utils;
 using GridFactory.Grid;
-using GridFactory.Blueprints;
+using GridFactory.Machines;
 using GridFactory.Conveyor;
+using GridFactory.Utils;
 using GridFactory.Directions;
-using GridFactory.Tech;
 using GridFactory.UI;
+using GridFactory.Meta;
 
-namespace GridFactory.Meta
+namespace GridFactory.Core
 {
-    public enum MetaBuildType
+    public enum BuildType
     {
         None,
-        ResourceNodeOre,
-        ResourceNodeFarm,
-        Market,
-        PowerPlant,
-        ResearchCenter,
+        Sawmill,
+        Oven,
+        Mason,
+        Smelter,
         Conveyor,
+        InputPort,
+        OutputPort,
         Splitter,
         Merger,
         Crossing,
-        Blueprint,
         Erase
     }
 
-    public enum MetaKind
+    public enum MachineKind
     {
-        Resource,
-        Market,
-        PowerPlant,
-        ResearchCenter,
-        Blueprint,
+        Sawmill,
+        Oven,
+        Mason,
+        Smelter,
+        PortMarker,
         Splitter,
         Merger,
         Crossing,
         None
     }
 
-    public class MetaBuildController : MonoBehaviour
+    public enum PortKind
     {
-        public static MetaBuildController Instance { get; private set; }
+        Input,
+        Output
+    }
 
-        private static MetaGridManager GrM => MetaGridManager.Instance;
-        private static BuildMenuUI BMUI => BuildMenuUI.Instance;
+    public class BuildController : MonoBehaviour
+    {
+        public static BuildController Instance { get; private set; }
+
         private static GameManager GM => GameManager.Instance;
+        private static GridManager GrM => GridManager.Instance;
+        private static BuildMenuUI BMUI => BuildMenuUI.Instance;
         private static AudioManager AM => AudioManager.Instance;
         private static PortBuildingController PBC => PortBuildingController.Instance;
         private static UIConfigurationManager UICONFIGM => UIConfigurationManager.Instance;
         private static TouchInputManager TIP => TouchInputManager.Instance;
-        private static UIPanelManager UIPM => UIPanelManager.Instance;
-        private static TechTreeManager TTM => TechTreeManager.Instance;
 
         [Header("Prefabs")]
-        [SerializeField] private GameObject resourceNodeOrePrefab;
-        [SerializeField] private GameObject resourceNodeFarmPrefab;
-        [SerializeField] private GameObject marketPrefab;
-        [SerializeField] private GameObject powerPlantPrefab;
-        [SerializeField] private GameObject metaConveyorPrefab;
-        [SerializeField] private GameObject metaSplitterPrefab;
-        [SerializeField] private GameObject metaMergerPrefab;
-        [SerializeField] private GameObject metaCrossingPrefab;
-        [SerializeField] private GameObject metaBlueprintModulePrefab;
-        [SerializeField] private GameObject metaResearchCenterModulePrefab;
+        [SerializeField] private GameObject sawmillPrefab;
+        [SerializeField] private GameObject masonPrefab;
+        [SerializeField] private GameObject ovenPrefab;
+        [SerializeField] private GameObject smelterPrefab;
+        [SerializeField] private GameObject inputPortPrefab;
+        [SerializeField] private GameObject outputPortPrefab;
+        [SerializeField] private GameObject conveyorPrefab;
+        [SerializeField] private GameObject splitterPrefab;
+        [SerializeField] private GameObject mergerPrefab;
+        [SerializeField] private GameObject crossingPrefab;
 
         [Header("Sprites")]
-        [SerializeField] private Sprite resourceNodeOreSprite;
-        [SerializeField] private Sprite resourceNodeFarmSprite;
-        [SerializeField] private Sprite marketSprite;
-        [SerializeField] private Sprite powerPlantSprite;
-        [SerializeField] private Sprite blueprintSprite;
-        [SerializeField] private Sprite researchCenterSprite;
-        [SerializeField] private Sprite conveyorStraightSprite;
-        [SerializeField] private Sprite conveyorCornerSprite;
+        [SerializeField] private Sprite sawmillSprite;
+        [SerializeField] private Sprite masonSprite;
+        [SerializeField] private Sprite ovenSprite;
+        [SerializeField] private Sprite smelterSprite;
+        [SerializeField] private Sprite inputPortSprite;  // für Ghost
+        [SerializeField] private Sprite outputPortSprite;  // für Ghost
         [SerializeField] private Sprite splitterSprite;
         [SerializeField] private Sprite mergerSprite;
         [SerializeField] private Sprite crossingSprite;
         [SerializeField] private Sprite eraseSprite;
+        [SerializeField] private Sprite conveyorStraightSprite;
+        [SerializeField] private Sprite conveyorCornerSprite;
 
         [Header("Ghost Preview")]
         [SerializeField] private GameObject ghostRendererContainer;
@@ -91,15 +94,14 @@ namespace GridFactory.Meta
         private BuildingGhost _ghost;
         private bool _ghostActive;
         private Vector2Int _ghostGridPos;
-        private MetaBuildType _currentBuildType = MetaBuildType.None;
-        private BlueprintDefinition _selectedBlueprint;
+        private BuildType _currentBuildType = BuildType.None;
         private Direction _outputFacing = Direction.Right;
-        private Direction _inputFacing = Direction.Right;
+        private Direction _inputFacing = Direction.Left;
         private Vector3 _baseScale = Vector3.one;
-        private Camera _metaCamera;
+        private Camera _camera;
 
-        public Action<MetaMachineBase> _onMachinePlaced;
-        public Action _onMachineRotated;
+        public Action<MachineBase> _onMachinePlaced;
+        public Action<MachineBase> _onMachineDestroyed;
 
         private void Awake()
         {
@@ -113,7 +115,7 @@ namespace GridFactory.Meta
 
         private void Start()
         {
-            _metaCamera = Camera.main;
+            _camera = Camera.main;
             if (ghostRendererContainer != null)
             {
                 ghostRendererContainer.SetActive(false);
@@ -133,7 +135,7 @@ namespace GridFactory.Meta
 
         private void Update()
         {
-            if (GM.CurrentMode == GameMode.Blueprint)
+            if (GM.CurrentMode == GameMode.Meta)
                 return;
 
             if (Input.GetMouseButtonDown(1))
@@ -148,14 +150,14 @@ namespace GridFactory.Meta
             if (GM.CurrentControlScheme == "desktop")
                 UpdateGhostPosition();
 
-            if (_ghostActive && _currentBuildType == MetaBuildType.Conveyor)
+            if (_ghostActive && _currentBuildType == BuildType.Conveyor)
                 UpdateGhostConveyorVisual();
 
             if (Input.GetMouseButtonDown(0))
             {
                 if (GM.CurrentControlScheme == "desktop")
                 {
-                    if (_currentBuildType == MetaBuildType.None)
+                    if (_currentBuildType == BuildType.None)
                         HandleSelectionInput();
                     else
                         HandleBuildInput();
@@ -171,7 +173,7 @@ namespace GridFactory.Meta
                         return;
                     }
 
-                    if (_currentBuildType == MetaBuildType.None)
+                    if (_currentBuildType == BuildType.None)
                         HandleSelectionInput();
                     else
                         UpdateGhostPosition();
@@ -184,9 +186,9 @@ namespace GridFactory.Meta
             if (EventSystem.current.IsPointerOverGameObject() || UIUtils.ClickedOnUi())
                 return;
 
-            Vector3 worldPos = _metaCamera.ScreenToWorldPoint(Input.mousePosition);
+            Vector3 worldPos = _camera.ScreenToWorldPoint(Input.mousePosition);
             Vector2Int gridPos = GrM.WorldToGrid(worldPos);
-            MetaCell cell = GrM.GetCell(gridPos);
+            GridCell cell = GrM.GetCell(gridPos);
 
             worldPos.z = 0f;
 
@@ -197,17 +199,13 @@ namespace GridFactory.Meta
                 return;
             }
 
-            if (cell.Machine is MetaResearchCenter center)
+            if (cell.Machine is PortMarker pm)
             {
-                UIPM.ToggleTechTreeUI(center);
+                UICONFIGM.SetPortmarker(pm);
             }
-            else if (cell.Machine is MetaResourceNode node)
+            else if (cell.Machine is MachineWithRecipeBase mwrb)
             {
-                UICONFIGM.SetResourceNode(node);
-            }
-            else if (cell.Machine is MetaBlueprintModule bpm)
-            {
-                UICONFIGM.SetBlueprintModule(bpm);
+                UICONFIGM.SetMachineWithRecipeBase(mwrb);
             }
             else
             {
@@ -221,57 +219,54 @@ namespace GridFactory.Meta
             if (EventSystem.current.IsPointerOverGameObject() || UIUtils.ClickedOnUi())
                 return;
 
-            if (!TutorialGridFactoryController.Instance.AllowBuilding())
+            if (_currentBuildType == BuildType.None)
                 return;
 
-            if (_currentBuildType == MetaBuildType.None)
-                return;
-
-            MetaCell cell = GrM.GetCell(_ghostGridPos);
-            if (cell == null)
+            GridCell cell = GrM.GetCell(_ghostGridPos);
+            if (cell == null || cell.IsLocked)
                 return;
 
             UICONFIGM.Close();
             ClearBuildMenu();
 
-            if (_currentBuildType == MetaBuildType.Erase)
+            if (_currentBuildType == BuildType.Erase)
                 AM.PlayDestroySFX();
             else
                 AM.PlayBuildSFX();
 
             switch (_currentBuildType)
             {
-                case MetaBuildType.ResourceNodeOre:
-                    PlaceMachine(cell, resourceNodeOrePrefab);
+                case BuildType.Sawmill:
+                    PlaceMachine(cell, sawmillPrefab);
                     break;
-                case MetaBuildType.ResourceNodeFarm:
-                    PlaceMachine(cell, resourceNodeFarmPrefab);
+                case BuildType.Mason:
+                    PlaceMachine(cell, masonPrefab);
                     break;
-                case MetaBuildType.Market:
-                    PlaceMachine(cell, marketPrefab);
+                case BuildType.Oven:
+                    PlaceMachine(cell, ovenPrefab);
                     break;
-                case MetaBuildType.PowerPlant:
-                    PlaceMachine(cell, powerPlantPrefab);
+                case BuildType.Smelter:
+                    PlaceMachine(cell, smelterPrefab);
                     break;
-                case MetaBuildType.Conveyor:
-                    PlaceConveyor(cell, metaConveyorPrefab);
+                case BuildType.InputPort:
+                    PlaceMachine(cell, inputPortPrefab);
                     break;
-                case MetaBuildType.Merger:
-                    PlaceMachine(cell, metaMergerPrefab);
+                case BuildType.OutputPort:
+                    PlaceMachine(cell, outputPortPrefab);
                     break;
-                case MetaBuildType.Splitter:
-                    PlaceMachine(cell, metaSplitterPrefab);
+                case BuildType.Splitter:
+                    PlaceMachine(cell, splitterPrefab);
                     break;
-                case MetaBuildType.Crossing:
-                    PlaceMachine(cell, metaCrossingPrefab);
+                case BuildType.Merger:
+                    PlaceMachine(cell, mergerPrefab);
                     break;
-                case MetaBuildType.Blueprint:
-                    PlaceBlueprintModule(cell, metaBlueprintModulePrefab);
+                case BuildType.Crossing:
+                    PlaceMachine(cell, crossingPrefab);
                     break;
-                case MetaBuildType.ResearchCenter:
-                    PlaceMachine(cell, metaResearchCenterModulePrefab);
+                case BuildType.Conveyor:
+                    PlaceConveyor(cell, conveyorPrefab);
                     break;
-                case MetaBuildType.Erase:
+                case BuildType.Erase:
                     EraseAt(cell);
                     break;
             }
@@ -281,14 +276,12 @@ namespace GridFactory.Meta
 
         public void CancelBuilding()
         {
-            if (!TutorialGridFactoryController.Instance.AllowBuildingCancel())
-                return;
-            if (_currentBuildType == MetaBuildType.None)
+            if (_currentBuildType == BuildType.None)
                 return;
 
-            _currentBuildType = MetaBuildType.None;
-            _selectedBlueprint = null;
+            _currentBuildType = BuildType.None;
 
+            PBC.DisablePortBuilding();
             UICONFIGM.Close();
             ClearBuildMenu();
 
@@ -298,57 +291,22 @@ namespace GridFactory.Meta
                 ghostRendererContainer.SetActive(false);
         }
 
-        public void SetBuildType(MetaBuildType type)
+        public void SetBuildType(BuildType type)
         {
             ResetDirectionAndGhost();
             _currentBuildType = type;
 
-            if (type == MetaBuildType.Blueprint)
-                UICONFIGM.SetBlueprintBuild();
+            if (_currentBuildType == BuildType.InputPort || _currentBuildType == BuildType.OutputPort)
+                PBC.EnablePortBuilding(_currentBuildType);
             else
-                UpdateGhostSprite();
-        }
-
-        public void SetSelectedBlueprint(BlueprintDefinition bp)
-        {
-            ResetDirectionAndGhost();
-
-            _selectedBlueprint = bp;
-
-            if (_ghost != null && _selectedBlueprint != null)
-            {
-                _ghost.InitFromBlueprint(_selectedBlueprint);
-                _ghost.SetFacing(_outputFacing);
-            }
+                PBC.DisablePortBuilding();
 
             UpdateGhostSprite();
+
+            if (_currentBuildType == BuildType.InputPort || _currentBuildType == BuildType.OutputPort)
+                PBC.ForcePortGhostRotation(ghostRendererContainer, _ghostGridPos);
         }
-
-        private void PlaceConveyor(MetaCell cell, GameObject prefab)
-        {
-            if (cell.Machine != null || cell.Conveyor != null || prefab == null)
-                return;
-
-            Vector3 pos = GrM.GridToWorld(cell.Position);
-            GameObject go = Instantiate(prefab, pos, Quaternion.identity);
-            go.transform.parent = GrM.transform;
-
-            var conv = go.GetComponent<MetaConveyorBase>();
-            if (conv != null)
-            {
-                conv.Init(cell);
-                conv.SetOutputDirection(_outputFacing);
-                conv.SetInputDirection(_inputFacing, true);
-                cell.Conveyor = conv;
-            }
-
-            RefreshAllMetaConveyors();
-
-            if (GM.CurrentControlScheme == "touch")
-                ForceConveyorGhostUpdate(_outputFacing);
-        }
-
-        private void PlaceMachine(MetaCell cell, GameObject prefab)
+        private void PlaceConveyor(GridCell cell, GameObject prefab)
         {
             if (cell.Machine != null || cell.Conveyor != null)
                 return;
@@ -357,54 +315,68 @@ namespace GridFactory.Meta
             GameObject go = Instantiate(prefab, pos, Quaternion.identity);
             go.transform.parent = GrM.transform;
 
-            var machine = go.GetComponent<MetaMachineBase>();
-            if (machine != null)
+            var conv = go.GetComponent<ConveyorBase>();
+            if (conv != null)
             {
-                machine.Init(cell);
-                machine.SetFacing(_outputFacing);
-                cell.Machine = machine;
-                if (machine is MetaResearchCenter mrsc)
-                {
-                    UIPM.OpenTechTreeUI(mrsc);
-                    CancelBuilding();
-                }
+                conv.Init(cell);
+                conv.SetOutputDirection(_outputFacing);
+                conv.SetInputDirection(_inputFacing, true);
+                cell.Conveyor = conv;
             }
 
-            RefreshAllMetaConveyors();
+            RefreshAllConveyors();
 
-            _onMachinePlaced?.Invoke(machine);
+            if (GM.CurrentControlScheme == "touch")
+                ForceConveyorGhostUpdate(_outputFacing);
         }
 
-        private void PlaceBlueprintModule(MetaCell cell, GameObject prefab)
+        private void PlaceMachine(GridCell cell, GameObject prefab)
         {
-            if (cell.Machine != null || cell.Conveyor != null || prefab == null || _selectedBlueprint == null)
+            if (cell.Machine != null || cell.Conveyor != null)
                 return;
-
 
             Vector3 pos = GrM.GridToWorld(cell.Position);
             GameObject go = Instantiate(prefab, pos, Quaternion.identity);
             go.transform.parent = GrM.transform;
 
-            var module = go.GetComponent<MetaBlueprintModule>();
-            if (module != null)
+            var machine = go.GetComponent<MachineBase>();
+            if (machine != null)
             {
-                module.Init(cell);
-                module.SetFacing(_outputFacing, false);
-                module.InitWithBlueprint(_selectedBlueprint);
-                cell.Machine = module;
+                machine.Init(cell);
+
+                if (machine is PortMarker)
+                    machine.SetFacing(PBC.GetForcedFacing());
+                else
+                    machine.SetFacing(_outputFacing);
+                cell.Machine = machine;
+
+                if (machine is MachineWithRecipeBase mwrb)
+                {
+                    mwrb.BuildInputOutputSides();
+                    mwrb.UpdateArrowPositions();
+                    UICONFIGM.SetMachineWithRecipeBase(mwrb);
+                }
+
+                if (machine is PortMarker pm)
+                {
+                    PBC.RegisterPort(pm);
+                    UICONFIGM.SetPortmarker(pm);
+                }
             }
 
-            RefreshAllMetaConveyors();
+            RefreshAllConveyors();
 
-            _onMachinePlaced?.Invoke(module);
+            _onMachinePlaced?.Invoke(machine);
         }
 
-        private void EraseAt(MetaCell cell)
+        private void EraseAt(GridCell cell)
         {
             if (cell.Machine != null)
             {
-                if (cell.Machine is MetaResearchCenter mrs)
-                    TTM.CloseOnResearchCenterDeletion(mrs);
+                _onMachineDestroyed?.Invoke(cell.Machine);
+
+                if (cell.Machine is PortMarker myMarker)
+                    PBC.EreasePortmarker(myMarker);
 
                 Destroy(cell.Machine.gameObject);
                 cell.Machine = null;
@@ -419,15 +391,13 @@ namespace GridFactory.Meta
 
         public void DoRotation()
         {
-            if (_currentBuildType == MetaBuildType.None)
+            if (_currentBuildType == BuildType.None || _currentBuildType == BuildType.InputPort || _currentBuildType == BuildType.OutputPort)
                 return;
 
             RotateFacing();
-            UpdateGhostRotation(_currentBuildType == MetaBuildType.Conveyor);
+            UpdateGhostRotation(_currentBuildType == BuildType.Conveyor);
 
             AM.PlayRotateSFX();
-
-            _onMachineRotated?.Invoke();
         }
 
         private void RotateFacing()
@@ -455,25 +425,29 @@ namespace GridFactory.Meta
 
         private void UpdateGhostPosition()
         {
-            if (!_ghostActive || ghostRendererContainer == null || _metaCamera == null)
+            if (!_ghostActive || ghostRendererContainer == null || _camera == null || GrM == null)
                 return;
 
-            Vector3 worldPos = _metaCamera.ScreenToWorldPoint(Input.mousePosition);
-            worldPos.z = 0f;
+            Vector3 worldPos = _camera.ScreenToWorldPoint(Input.mousePosition);
+            worldPos.z = 0;
 
             _ghostGridPos = GrM.WorldToGrid(worldPos);
-
-            MetaCell cell = GrM.GetCell(_ghostGridPos);
+            GridCell cell = GrM.GetCell(_ghostGridPos);
             if (cell == null)
                 return;
 
             Vector3 snappedWorld = GrM.GridToWorld(_ghostGridPos);
             ghostRendererContainer.transform.position = snappedWorld;
+
+            if (_currentBuildType == BuildType.InputPort || _currentBuildType == BuildType.OutputPort)
+                PBC.ForcePortGhostRotation(ghostRendererContainer, _ghostGridPos);
         }
 
         private void UpdateGhostRotation(bool isConv = false)
         {
             if (_ghostMainRenderer == null || ghostRendererContainer == null)
+                return;
+            if (_currentBuildType == BuildType.InputPort || _currentBuildType == BuildType.OutputPort)
                 return;
 
             float angle = 0f;
@@ -499,64 +473,67 @@ namespace GridFactory.Meta
             _ghostActive = true;
             _outputFacing = Direction.Right;
 
-            var machine = resourceNodeOrePrefab.GetComponent<MetaMachineBase>();
+            var machine = inputPortPrefab.GetComponent<MachineBase>();
             switch (_currentBuildType)
             {
-                case MetaBuildType.ResourceNodeOre:
-                    sprite = resourceNodeOreSprite;
-                    machine = resourceNodeOrePrefab.GetComponent<MetaMachineBase>();
+                case BuildType.Sawmill:
+                    sprite = sawmillSprite;
+                    machine = sawmillPrefab.GetComponent<MachineWithRecipeBase>();
                     _ghost.InitByDirections(machine.HasInput, machine.HasOutput, machine.AllInputDirections(), machine.AllOutputDirections());
                     _ghost.SetFacing(_outputFacing);
                     break;
-                case MetaBuildType.ResourceNodeFarm:
-                    sprite = resourceNodeFarmSprite;
-                    machine = resourceNodeFarmPrefab.GetComponent<MetaMachineBase>();
+                case BuildType.Mason:
+                    sprite = masonSprite;
+                    machine = masonPrefab.GetComponent<MachineWithRecipeBase>();
                     _ghost.InitByDirections(machine.HasInput, machine.HasOutput, machine.AllInputDirections(), machine.AllOutputDirections());
                     _ghost.SetFacing(_outputFacing);
                     break;
-                case MetaBuildType.Market:
-                    sprite = marketSprite;
-                    machine = marketPrefab.GetComponent<MetaMachineBase>();
+                case BuildType.Oven:
+                    sprite = ovenSprite;
+                    machine = ovenPrefab.GetComponent<MachineWithRecipeBase>();
                     _ghost.InitByDirections(machine.HasInput, machine.HasOutput, machine.AllInputDirections(), machine.AllOutputDirections());
                     _ghost.SetFacing(_outputFacing);
                     break;
-                case MetaBuildType.PowerPlant:
-                    sprite = powerPlantSprite;
-                    machine = powerPlantPrefab.GetComponent<MetaMachineBase>();
+                case BuildType.Smelter:
+                    sprite = smelterSprite;
+                    machine = smelterPrefab.GetComponent<MachineWithRecipeBase>();
                     _ghost.InitByDirections(machine.HasInput, machine.HasOutput, machine.AllInputDirections(), machine.AllOutputDirections());
                     _ghost.SetFacing(_outputFacing);
                     break;
-                case MetaBuildType.ResearchCenter:
-                    sprite = researchCenterSprite;
-                    machine = metaResearchCenterModulePrefab.GetComponent<MetaMachineBase>();
-                    _ghost.InitByDirections(machine.HasInput, machine.HasOutput, machine.AllInputDirections(), machine.AllOutputDirections());
-                    _ghost.SetFacing(_outputFacing);
-                    break;
-                case MetaBuildType.Blueprint:
-                    sprite = blueprintSprite;
-                    break;
-                case MetaBuildType.Conveyor:
+                case BuildType.Conveyor:
                     sprite = conveyorStraightSprite;
                     break;
-                case MetaBuildType.Splitter:
+                case BuildType.InputPort:
+                    sprite = inputPortSprite;
+                    machine = inputPortPrefab.GetComponent<MachineBase>();
+                    _ghost.InitByDirections(machine.HasInput, machine.HasOutput, machine.AllInputDirections(), machine.AllOutputDirections());
+                    _ghost.SetFacing(_outputFacing);
+                    break;
+                case BuildType.OutputPort:
+                    sprite = outputPortSprite;
+                    machine = outputPortPrefab.GetComponent<MachineBase>();
+                    _ghost.InitByDirections(machine.HasInput, machine.HasOutput, machine.AllInputDirections(), machine.AllOutputDirections());
+                    _ghost.SetFacing(_outputFacing);
+                    break;
+                case BuildType.Splitter:
                     sprite = splitterSprite;
-                    machine = metaSplitterPrefab.GetComponent<MetaSplitter>();
+                    machine = splitterPrefab.GetComponent<Splitter>();
                     _ghost.InitByDirections(machine.HasInput, machine.HasOutput, machine.AllInputDirections(), machine.AllOutputDirections());
                     _ghost.SetFacing(_outputFacing);
                     break;
-                case MetaBuildType.Merger:
+                case BuildType.Merger:
                     sprite = mergerSprite;
-                    machine = metaMergerPrefab.GetComponent<MetaMerger>();
+                    machine = mergerPrefab.GetComponent<Merger>();
                     _ghost.InitByDirections(machine.HasInput, machine.HasOutput, machine.AllInputDirections(), machine.AllOutputDirections());
                     _ghost.SetFacing(_outputFacing);
                     break;
-                case MetaBuildType.Crossing:
+                case BuildType.Crossing:
                     sprite = crossingSprite;
                     break;
-                case MetaBuildType.Erase:
+                case BuildType.Erase:
                     sprite = eraseSprite;
                     break;
-                case MetaBuildType.None:
+                case BuildType.None:
                     _ghostActive = false;
                     break;
             }
@@ -565,12 +542,13 @@ namespace GridFactory.Meta
             _ghostMainRenderer.transform.localScale = _baseScale;
             ghostRendererContainer.SetActive(_ghostActive);
 
-            UpdateGhostRotation(_currentBuildType == MetaBuildType.Conveyor);
+
+            UpdateGhostRotation(_currentBuildType == BuildType.Conveyor);
         }
 
         private void UpdateGhostConveyorVisual()
         {
-            if (!_ghostActive || ghostRendererContainer == null || _currentBuildType != MetaBuildType.Conveyor)
+            if (!_ghostActive || ghostRendererContainer == null || _currentBuildType != BuildType.Conveyor)
                 return;
 
             _ghostMainRenderer.sprite = conveyorStraightSprite;
@@ -593,10 +571,10 @@ namespace GridFactory.Meta
             var fPos = _ghostGridPos + DirectionUtils.DirectionToOffset(_outputFacing);
             var bPos = _ghostGridPos + DirectionUtils.DirectionToOffset(DirectionUtils.Opposite(_outputFacing));
 
-            MetaCell fCell = GrM.GetCell(fPos);
-            MetaCell bCell = GrM.GetCell(bPos);
-            MetaCell lCell = GrM.GetCell(lPos);
-            MetaCell rCell = GrM.GetCell(rPos);
+            GridCell fCell = GrM.GetCell(fPos);
+            GridCell bCell = GrM.GetCell(bPos);
+            GridCell lCell = GrM.GetCell(lPos);
+            GridCell rCell = GrM.GetCell(rPos);
 
             bool leftCorner = false;
             bool rightCorner = false;
@@ -626,11 +604,12 @@ namespace GridFactory.Meta
                     rightCorner = true;
                 }
             }
+
             if (hasLeftMachine)
             {
                 var machine = lCell.Machine;
-                MetaKind machineKind = machine.GetMetaKind();
-                if (machineKind != MetaKind.Splitter && machineKind != MetaKind.Crossing)
+                MachineKind machineKind = machine.GetMachineKind();
+                if (machineKind != MachineKind.Splitter && machineKind != MachineKind.Crossing)
                 {
                     if (lCell.Machine.OutputDirection != DirectionUtils.Opposite(_outputFacing) && (lCell.Machine.InputDirection == DirectionUtils.Opposite(DirectionUtils.GetRight(_outputFacing))))
                     {
@@ -640,7 +619,7 @@ namespace GridFactory.Meta
                 }
                 else
                 {
-                    if (machineKind == MetaKind.Splitter)
+                    if (machineKind == MachineKind.Splitter)
                     {
                         foreach (Direction dir in DirectionUtils.AllDirections())
                         {
@@ -654,9 +633,10 @@ namespace GridFactory.Meta
                             }
                         }
                     }
-                    else if (machineKind == MetaKind.Crossing)
+                    else if (machineKind == MachineKind.Crossing)
                     {
-                        MetaCrossing cross = lCell.Machine as MetaCrossing;
+                        Crossing cross = lCell.Machine as Crossing;
+
                         foreach (Direction dir in DirectionUtils.AllDirections())
                         {
                             if (dir != cross.InputDirection && dir != cross.AllExtraInpuDirections[0])
@@ -667,7 +647,6 @@ namespace GridFactory.Meta
                                     leftCorner = true;
                                 }
                             }
-
                         }
                     }
                 }
@@ -676,9 +655,9 @@ namespace GridFactory.Meta
             if (hasRightMachine)
             {
                 var machine = rCell.Machine;
-                MetaKind machineKind = machine.GetMetaKind();
+                MachineKind machineKind = machine.GetMachineKind();
 
-                if (machineKind != MetaKind.Splitter && machineKind != MetaKind.Crossing)
+                if (machineKind != MachineKind.Splitter && machineKind != MachineKind.Crossing)
                 {
                     if (rCell.Machine.OutputDirection != DirectionUtils.Opposite(_outputFacing) && (rCell.Machine.InputDirection == DirectionUtils.Opposite(DirectionUtils.GetLeft(_outputFacing))))
                     {
@@ -688,7 +667,7 @@ namespace GridFactory.Meta
                 }
                 else
                 {
-                    if (machineKind == MetaKind.Splitter)
+                    if (machineKind == MachineKind.Splitter)
                     {
                         foreach (Direction dir in DirectionUtils.AllDirections())
                         {
@@ -702,9 +681,9 @@ namespace GridFactory.Meta
                             }
                         }
                     }
-                    else if (machineKind == MetaKind.Crossing)
+                    else if (machineKind == MachineKind.Crossing)
                     {
-                        MetaCrossing cross = rCell.Machine as MetaCrossing;
+                        Crossing cross = rCell.Machine as Crossing;
                         foreach (Direction dir in DirectionUtils.AllDirections())
                         {
                             if (dir != cross.InputDirection && dir != cross.AllExtraInpuDirections[0])
@@ -715,6 +694,7 @@ namespace GridFactory.Meta
                                     rightCorner = true;
                                 }
                             }
+
                         }
                     }
                 }
@@ -723,8 +703,8 @@ namespace GridFactory.Meta
             bool isCorner = leftCorner || rightCorner;
 
             if (bCell != null && bCell.Conveyor != null
-               && bCell.Conveyor.OutputDirection == DirectionUtils.Opposite(_outputFacing)
-               && bCell.Conveyor.InputDirection == DirectionUtils.Opposite(bCell.Conveyor.OutputDirection))
+                && bCell.Conveyor.OutputDirection == DirectionUtils.Opposite(_outputFacing)
+                && bCell.Conveyor.InputDirection == DirectionUtils.Opposite(bCell.Conveyor.OutputDirection))
             {
                 isCorner = false;
             }
@@ -760,25 +740,15 @@ namespace GridFactory.Meta
             ghostRendererContainer.transform.position = snappedWorld;
         }
 
-        public void ForceGhostToPosition_Tutorial(Vector2Int pos)
-        {
-            if (!_ghostActive || ghostRendererContainer == null || _metaCamera == null)
-                return;
-
-            _ghostGridPos = pos;
-            Vector3 snappedWorld = GrM.GridToWorld(_ghostGridPos);
-            ghostRendererContainer.transform.position = snappedWorld;
-        }
-
-        private void RefreshAllMetaConveyors()
+        private void RefreshAllConveyors()
         {
             /*
-            var allConv = FindObjectsOfType<MetaConveyorBase>();
-            foreach (var c in allConv)
-            {
-                c.UpdateShapeAndRotation();
-            }
-            */
+                var allConv = FindObjectsOfType<ConveyorBase>();
+                foreach (var c in allConv)
+                {
+                    c.UpdateShapeAndRotation();
+                }
+          */
         }
 
         private void ClearBuildMenu()
@@ -787,3 +757,4 @@ namespace GridFactory.Meta
         }
     }
 }
+
