@@ -49,6 +49,13 @@ namespace GridFactory.Meta
 
         private static MetaGridManager GrM => MetaGridManager.Instance;
         private static BuildMenuUI BMUI => BuildMenuUI.Instance;
+        private static GameManager GM => GameManager.Instance;
+        private static AudioManager AM => AudioManager.Instance;
+        private static PortBuildingController PBC => PortBuildingController.Instance;
+        private static UIConfigurationManager UICONFIGM => UIConfigurationManager.Instance;
+        private static TouchInputManager TIP => TouchInputManager.Instance;
+        private static UIPanelManager UIPM => UIPanelManager.Instance;
+        private static TechTreeManager TTM => TechTreeManager.Instance;
 
         [Header("Prefabs")]
         [SerializeField] private GameObject resourceNodeOrePrefab;
@@ -126,7 +133,7 @@ namespace GridFactory.Meta
 
         private void Update()
         {
-            if (GameManager.Instance.CurrentMode == GameMode.Blueprint)
+            if (GM.CurrentMode == GameMode.Blueprint)
                 return;
 
             if (Input.GetMouseButtonDown(1))
@@ -138,7 +145,7 @@ namespace GridFactory.Meta
             if (Input.GetKeyDown(KeyCode.R))
                 DoRotation();
 
-            if (GameManager.Instance.CurrentControlScheme == "desktop")
+            if (GM.CurrentControlScheme == "desktop")
                 UpdateGhostPosition();
 
             if (_ghostActive && _currentBuildType == MetaBuildType.Conveyor)
@@ -146,19 +153,19 @@ namespace GridFactory.Meta
 
             if (Input.GetMouseButtonDown(0))
             {
-                if (GameManager.Instance.CurrentControlScheme == "desktop")
+                if (GM.CurrentControlScheme == "desktop")
                 {
                     if (_currentBuildType == MetaBuildType.None)
                         HandleSelectionInput();
                     else
                         HandleBuildInput();
                 }
-                else if (GameManager.Instance.CurrentControlScheme == "touch")
+                else if (GM.CurrentControlScheme == "touch")
                 {
                     if (UIUtils.ClickedOnUi())
                         return;
 
-                    if (TouchInputManager.Instance.IsDoubleTapOnSameCell())
+                    if (TIP.IsDoubleTapOnSameCell())
                     {
                         HandleBuildInput();
                         return;
@@ -185,32 +192,35 @@ namespace GridFactory.Meta
 
             if (cell == null || cell.Machine == null)
             {
-                UIConfigurationManager.Instance.Close();
+                UICONFIGM.Close();
                 ClearBuildMenu();
                 return;
             }
 
             if (cell.Machine is MetaResearchCenter center)
             {
-                UIPanelManager.Instance.ToggleTechTreeUI(center);
+                UIPM.ToggleTechTreeUI(center);
             }
             else if (cell.Machine is MetaResourceNode node)
             {
-                UIConfigurationManager.Instance.SetResourceNode(node);
+                UICONFIGM.SetResourceNode(node);
             }
             else if (cell.Machine is MetaBlueprintModule bpm)
             {
-                UIConfigurationManager.Instance.SetBlueprintModule(bpm);
+                UICONFIGM.SetBlueprintModule(bpm);
             }
             else
             {
-                UIConfigurationManager.Instance.Close();
+                UICONFIGM.Close();
                 ClearBuildMenu();
             }
         }
 
         public void HandleBuildInput()
         {
+            if (EventSystem.current.IsPointerOverGameObject() || UIUtils.ClickedOnUi())
+                return;
+
             if (!TutorialGridFactoryController.Instance.AllowBuilding())
                 return;
 
@@ -221,13 +231,13 @@ namespace GridFactory.Meta
             if (cell == null)
                 return;
 
-            UIConfigurationManager.Instance.Close();
+            UICONFIGM.Close();
             ClearBuildMenu();
 
             if (_currentBuildType == MetaBuildType.Erase)
-                AudioManager.Instance.PlayDestroySFX();
+                AM.PlayDestroySFX();
             else
-                AudioManager.Instance.PlayBuildSFX();
+                AM.PlayBuildSFX();
 
             switch (_currentBuildType)
             {
@@ -279,7 +289,7 @@ namespace GridFactory.Meta
             _currentBuildType = MetaBuildType.None;
             _selectedBlueprint = null;
 
-            UIConfigurationManager.Instance.Close();
+            UICONFIGM.Close();
             ClearBuildMenu();
 
             ResetDirectionAndGhost();
@@ -294,7 +304,7 @@ namespace GridFactory.Meta
             _currentBuildType = type;
 
             if (type == MetaBuildType.Blueprint)
-                UIConfigurationManager.Instance.SetBlueprintBuild();
+                UICONFIGM.SetBlueprintBuild();
             else
                 UpdateGhostSprite();
         }
@@ -334,7 +344,7 @@ namespace GridFactory.Meta
 
             RefreshAllMetaConveyors();
 
-            if (GameManager.Instance.CurrentControlScheme == "touch")
+            if (GM.CurrentControlScheme == "touch")
                 ForceConveyorGhostUpdate(_outputFacing);
         }
 
@@ -355,7 +365,7 @@ namespace GridFactory.Meta
                 cell.Machine = machine;
                 if (machine is MetaResearchCenter mrsc)
                 {
-                    UIPanelManager.Instance.OpenTechTreeUI(mrsc);
+                    UIPM.OpenTechTreeUI(mrsc);
                     CancelBuilding();
                 }
             }
@@ -394,7 +404,7 @@ namespace GridFactory.Meta
             if (cell.Machine != null)
             {
                 if (cell.Machine is MetaResearchCenter mrs)
-                    TechTreeManager.Instance.CloseOnResearchCenterDeletion(mrs);
+                    TTM.CloseOnResearchCenterDeletion(mrs);
 
                 Destroy(cell.Machine.gameObject);
                 cell.Machine = null;
@@ -415,7 +425,7 @@ namespace GridFactory.Meta
             RotateFacing();
             UpdateGhostRotation(_currentBuildType == MetaBuildType.Conveyor);
 
-            AudioManager.Instance.PlayRotateSFX();
+            AM.PlayRotateSFX();
 
             _onMachineRotated?.Invoke();
         }
